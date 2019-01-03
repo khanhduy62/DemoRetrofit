@@ -17,7 +17,7 @@ class MainApplication: Application() {
         super.onCreate()
 
         clientHomePage = Retrofit.Builder()
-                .baseUrl("http://10.11.1.2:1337/")
+                .baseUrl("http://172.16.25.127:1337/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
     }
