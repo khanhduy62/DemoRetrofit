@@ -27,7 +27,9 @@ class MainActivity : AppCompatActivity(), Callback<User> {
             print("Dang-co-loi $e")
         }
 
-        val observable = Observable.just("Hello world", " Ahihi", " Testabc!123")
+        val observable = Observable
+                .just("Hello world", " Ahihi", " Testabc!123")
+                .map { it -> "$it-used to map " }
 
         val observer = object: Observer<String> {
             override fun onComplete() {
