@@ -1,28 +1,47 @@
 package com.example.duyle.demoretrofit
 
+import android.databinding.DataBindingUtil
 import android.os.Bundle
+import android.os.Handler
 import android.support.v7.app.AppCompatActivity
+import android.text.TextUtils
 import android.util.Log
+import com.example.duyle.demoretrofit.databinding.ActivityMainBinding
 import com.example.duyle.demoretrofit.model.User
 import io.reactivex.Observable
 import io.reactivex.Observer
+import io.reactivex.Scheduler
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Consumer
+import io.reactivex.schedulers.Schedulers
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.util.concurrent.Callable
 
-class MainActivity : AppCompatActivity(), Callback<User> {
+class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        val binding: ActivityMainBinding = DataBindingUtil.setContentView(
+                this, R.layout.activity_main)
 
+        binding.isVisible = true
         try {
             val apiClient = MainApplication.clientHomePage?.create(ApiClient::class.java)
-
-            apiClient?.getSpecificUser(1)?.enqueue(this)
+            apiClient!!
+                    .getSpecificUser(1)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            {user ->
+                                binding.user = user
+                                Handler()
+                                        .postDelayed({ binding.isVisible = false }, 2000)
+                                },
+                            {t -> t.printStackTrace()}
+                    )
         } catch (e: Exception) {
             print("Dang-co-loi $e")
         }
@@ -56,15 +75,6 @@ class MainActivity : AppCompatActivity(), Callback<User> {
         }, {
             Log.d("Observer ", " done")
         })
-    }
-
-    override fun onFailure(call: Call<User>?, t: Throwable?) {
-        t?.printStackTrace()
-        println("Loi-khi-goi-server ${t?.printStackTrace()}")
-    }
-
-    override fun onResponse(call: Call<User>?, response: Response<User>?) {
-        println("result::: ${response?.body()?.id} - ${response?.body()?.email} - ${response?.body()?.danhSachChuyenDi?.size}")
     }
 
 }
